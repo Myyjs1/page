@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个性化起始页</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 便签组件 -->
+        <button class="notes-btn" title="便签">📝</button>
+        <div class="notes-container">
+            <div class="notes-header">
+                <h2>便签</h2>
+                <div class="notes-actions">
+                    <button class="add-note-btn">添加便签</button>
+                </div>
+            </div>
+            <div class="notes-list">
+                <!-- 便签列表将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        <!-- 时钟组件 -->
+        <div class="clock-container">
+            <div class="clock" id="clock"></div>
+        </div>
+        <!-- 设置面板 -->
+        <div class="settings-panel" style="display: none;">
+            <div class="settings-header">
+                <h3>设置</h3>
+                <button class="close-settings">×</button>
+            </div>
+            <div class="settings-content">
+                <div class="settings-section">
+                    <h4>壁纸设置</h4>
+                    <div class="setting-item">
+                        <label for="wallpaperToggle">启用壁纸</label>
+                        <input type="checkbox" id="wallpaperToggle">
+                    </div>
+                    <div class="setting-item">
+                        <label for="blurLevel">模糊程度</label>
+                        <input type="range" id="blurLevel" min="0" max="20" value="10">
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>搜索引擎</h4>
+                    <div class="setting-item">
+                        <button id="manageSearchEngines" class="data-action-btn">管理搜索引擎</button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>数据管理</h4>
+                    <div class="setting-item">
+                        <button id="exportData" class="data-action-btn">导出数据</button>
+                        <button id="importData" class="data-action-btn">导入数据</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 搜索区域 -->
+        <div class="search-container">
+            <div class="search-engine-selector">
+                <button class="engine-settings-btn" title="搜索引擎设置"><svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M832 512.512v-192H320v128.384L64.352 256.512 320 63.872v128.64h640v320h-128z m-640 192h512v-128.64l255.584 192.64L704 960.896v-128.384H64v-320h128v192z" fill="currentColor"></path></svg></button>
+                <span class="current-engine" title="搜索引擎设置">Bing</span>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="输入搜索内容...">
+                <button id="searchButton"></button>
+            </div>
+        </div>
+
+        <!-- 收藏夹区域 -->
+        <div class="bookmarks-container">
+            <div class="bookmarks-header">
+                <h2>我的收藏</h2>
+                <div class="bookmarks-actions">
+                    <button id="toggleBookmarks" class="toggle-bookmarks" title="显示/隐藏收藏夹">👁️</button>
+                    <button id="addBookmark" class="add-bookmark-btn">添加收藏</button>
+                </div>
+            </div>
+            <div class="categories-container">
+                <!-- 分类区域将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加网站模态框 -->
+    <div class="modal" id="addBookmarkModal">
+        <div class="modal-content">
+            <h3>添加网站</h3>
+            <input type="url" id="siteUrl" placeholder="网站地址">
+            <select id="siteCategory">
+                <option value="">选择分类</option>
+                <option value="new">新建分类</option>
+            </select>
+            <input type="text" id="newCategory" placeholder="新分类名称" style="display: none;">
+            <div class="modal-buttons">
+                <button id="cancelAdd">取消</button>
+                <button id="confirmAdd">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索引擎设置模态框 -->
+    <div class="modal" id="searchEngineModal">
+        <div class="modal-content">
+            <h3>搜索引擎设置</h3>
+            <div class="search-engines-list">
+                <!-- 搜索引擎列表将通过JavaScript动态生成 -->
+            </div>
+            <div class="add-engine-form" style="display: none;">
+                <input type="text" id="engineName" placeholder="搜索引擎名称">
+                <input type="text" id="engineUrl" placeholder="搜索URL（使用 %s 作为搜索词占位符）">
+            </div>
+            <div class="modal-buttons">
+                <button id="addNewEngine" class="secondary-btn">添加新引擎</button>
+                <button id="cancelEngineSettings" class="cancel-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置按钮 -->
+    <button class="settings-btn" title="设置">⚙️</button>
+    
+    <script src="js/main.js"></script>
+    <script src="js/notes.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/wallpaper.js"></script>
+    <script src="js/wallpaperPreview.js"></script>
+    <script src="js/clock.js"></script>
+</body>
+</html>
