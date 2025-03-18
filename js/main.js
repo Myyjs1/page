@@ -119,12 +119,14 @@ function renderSearchEngines() {
         const deleteBtn = engineDiv.querySelector('.delete-engine');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => {
-                if (confirm(`确定要删除搜索引擎 "${engine.name}" 吗？`)) {
-                    delete searchEngines[key];
-                    delete customEngines[key];
-                    localStorage.setItem('customEngines', JSON.stringify(customEngines));
-                    renderSearchEngines();
-                }
+                showConfirmDialog('删除搜索引擎', `确定要删除搜索引擎 "${engine.name}" 吗？`).then(confirmed => {
+                    if (confirmed) {
+                        delete searchEngines[key];
+                        delete customEngines[key];
+                        localStorage.setItem('customEngines', JSON.stringify(customEngines));
+                        renderSearchEngines();
+                    }
+                });
             });
         }
     });
@@ -183,105 +185,138 @@ async function getFavicon(url) {
 function renderBookmarks() {
     categoriesContainer.innerHTML = '';
     
+    // 确保常用类别存在
+    if (!bookmarks['常用']) {
+        bookmarks['常用'] = [];
+    }
+    
+    // 先渲染常用类别
+    renderCategory('常用', 'frequently-used');
+    
+    // 渲染其他类别
     for (const category in bookmarks) {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'category';
-        categoryDiv.innerHTML = `
-            <div class="category-header">
-                <span>${category}</span>
-                <div class="category-actions">
-                    <button class="category-edit" title="编辑分类">✏️</button>
-                    <button class="category-delete" title="删除分类">🗑️</button>
-                </div>
+        if (category !== '常用') {
+            renderCategory(category, 'folder-style');
+        }
+    }
+}
+
+function renderCategory(category, styleClass) {
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = `category ${styleClass}`;
+    categoryDiv.innerHTML = `
+        <div class="category-header">
+            <span>${category}</span>
+            <div class="category-actions">
+                <button class="category-edit" title="编辑分类">✏️</button>
+                <button class="category-delete" title="删除分类">🗑️</button>
             </div>
-            <div class="bookmarks-grid"></div>
-        `;
-        
-        // 添加分类编辑功能
-        const editCategoryBtn = categoryDiv.querySelector('.category-edit');
-        editCategoryBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const categoryElement = e.target.closest('.category');
-            const isEditing = categoryElement.classList.contains('editing');
-            
-            // 移除所有分类的编辑状态
-            document.querySelectorAll('.category').forEach(cat => cat.classList.remove('editing'));
-            
-            if (!isEditing) {
-                // 进入编辑模式
-                categoryElement.classList.add('editing');
+        </div>
+        <div class="bookmarks-grid"></div>
+    `;
+    
+    // 为文件夹样式添加点击展开/收起功能
+    if (styleClass === 'folder-style') {
+        const categoryHeader = categoryDiv.querySelector('.category-header');
+        categoryHeader.addEventListener('click', (e) => {
+            if (!e.target.matches('.category-edit, .category-delete')) {
+                categoryDiv.classList.toggle('expanded');
             }
         });
+    }
+    
+    // 添加分类编辑功能
+    const editCategoryBtn = categoryDiv.querySelector('.category-edit');
+    editCategoryBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const categoryElement = e.target.closest('.category');
+        const isEditing = categoryElement.classList.contains('editing');
         
-        // 添加分类删除功能
-        const deleteCategoryBtn = categoryDiv.querySelector('.category-delete');
-        deleteCategoryBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (confirm(`确定要删除 "${category}" 分类及其所有书签吗？`)) {
+        // 移除所有分类的编辑状态
+        document.querySelectorAll('.category').forEach(cat => cat.classList.remove('editing'));
+        
+        if (!isEditing) {
+            // 进入编辑模式
+            categoryElement.classList.add('editing');
+        }
+    });
+    
+    // 添加分类删除功能
+    const deleteCategoryBtn = categoryDiv.querySelector('.category-delete');
+    deleteCategoryBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (category === '常用') {
+            alert('常用类别不能删除！');
+            return;
+        }
+        showConfirmDialog('删除分类', `确定要删除 "${category}" 分类及其所有书签吗？`).then(confirmed => {
+            if (confirmed) {
                 delete bookmarks[category];
                 localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
                 renderBookmarks();
             }
         });
+    });
+    
+    const bookmarksGrid = categoryDiv.querySelector('.bookmarks-grid');
+    bookmarks[category].forEach((bookmark, index) => {
+        const bookmarkDiv = document.createElement('div');
+        bookmarkDiv.className = 'bookmark-item';
+        bookmarkDiv.innerHTML = `
+            <div class="bookmark-content">
+                <img class="bookmark-icon" src="" alt="" onerror="this.style.display='none'">
+                <div class="bookmark-info">
+                    <div class="bookmark-title">${bookmark.name}</div>
+                </div>
+            </div>
+            <div class="bookmark-actions">
+                <button class="bookmark-edit" title="编辑书签"></button>
+                <button class="bookmark-delete" title="删除书签">🗑️</button>
+            </div>
+        `;
         
-        const bookmarksGrid = categoryDiv.querySelector('.bookmarks-grid');
-        bookmarks[category].forEach((bookmark, index) => {
-            const bookmarkDiv = document.createElement('div');
-            bookmarkDiv.className = 'bookmark-item';
-            bookmarkDiv.innerHTML = `
-                <div class="bookmark-content">
-                    <img class="bookmark-icon" src="" alt="" onerror="this.style.display='none'">
-                    <div class="bookmark-info">
-                        <div class="bookmark-title">${bookmark.name}</div>
-                    </div>
-                </div>
-                <div class="bookmark-actions">
-                    <button class="bookmark-edit" title="编辑书签"></button>
-                    <button class="bookmark-delete" title="删除书签">🗑️</button>
-                </div>
-            `;
-            
-            // 获取并设置网站图标
-            const iconImg = bookmarkDiv.querySelector('.bookmark-icon');
-            getFavicon(bookmark.url).then(iconUrl => {
-                if (iconUrl) {
-                    iconImg.src = iconUrl;
-                    iconImg.style.display = 'block';
-                }
-            });
-            
-            // 点击书签跳转
-            const bookmarkContent = bookmarkDiv.querySelector('.bookmark-content');
-            bookmarkContent.addEventListener('click', () => {
-                window.open(bookmark.url, '_blank');
-            });
-            
-            // 编辑书签
-            const editBtn = bookmarkDiv.querySelector('.bookmark-edit');
-            editBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                editBookmark(category, index);
-            });
-            
-            // 删除书签
-            const deleteBtn = bookmarkDiv.querySelector('.bookmark-delete');
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                if (confirm(`确定要删除 "${bookmark.name}" 书签吗？`)) {
+        // 获取并设置网站图标
+        const iconImg = bookmarkDiv.querySelector('.bookmark-icon');
+        getFavicon(bookmark.url).then(iconUrl => {
+            if (iconUrl) {
+                iconImg.src = iconUrl;
+                iconImg.style.display = 'block';
+            }
+        });
+        
+        // 点击书签跳转
+        const bookmarkContent = bookmarkDiv.querySelector('.bookmark-content');
+        bookmarkContent.addEventListener('click', () => {
+            window.open(bookmark.url, '_blank');
+        });
+        
+        // 编辑书签
+        const editBtn = bookmarkDiv.querySelector('.bookmark-edit');
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            editBookmark(category, index);
+        });
+        
+        // 删除书签
+        const deleteBtn = bookmarkDiv.querySelector('.bookmark-delete');
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showConfirmDialog('删除书签', `确定要删除 "${bookmark.name}" 书签吗？`).then(confirmed => {
+                if (confirmed) {
                     bookmarks[category].splice(index, 1);
-                    if (bookmarks[category].length === 0) {
+                    if (bookmarks[category].length === 0 && category !== '常用') {
                         delete bookmarks[category];
                     }
                     localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
                     renderBookmarks();
                 }
             });
-            
-            bookmarksGrid.appendChild(bookmarkDiv);
         });
         
-        categoriesContainer.appendChild(categoryDiv);
-    }
+        bookmarksGrid.appendChild(bookmarkDiv);
+    });
+    
+    categoriesContainer.appendChild(categoryDiv);
 }
 
 // 添加网站模态框管理
@@ -292,14 +327,17 @@ addBookmarkBtn.addEventListener('click', () => {
         addBookmarkModal.classList.add('show');
     });
     const categorySelect = document.getElementById('siteCategory');
-    // 清空并重新填充分类选项
-    while (categorySelect.options.length > 2) {
-        categorySelect.remove(2);
+    categorySelect.innerHTML = '<option value="常用">常用</option><option value="new">新建分类</option>';
+    
+    // 添加现有分类到选择框
+    for (const category in bookmarks) {
+        if (category !== '常用') {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        }
     }
-    Object.keys(bookmarks).forEach(category => {
-        const option = new Option(category, category);
-        categorySelect.add(option);
-    });
 });
 
 document.getElementById('siteCategory').addEventListener('change', (e) => {

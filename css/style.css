@@ -948,6 +948,38 @@ body.dark-theme .data-action-btn {
     box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.3);
 }
 
+/* 下拉选择框样式 */
+select {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid rgba(210, 210, 215, 0.5);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 1rem;
+    color: #1d1d1f;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+select:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 113, 227, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+select:focus {
+    outline: none;
+    border-color: #0071e3;
+    box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.3);
+}
+
 /* 模态框样式 */
 .modal {
     display: none;
@@ -1134,4 +1166,43 @@ body.dark-theme .data-action-btn {
 .bookmark-title {
     font-weight: 500;
     color: #1d1d1f;
+}
+
+.category.folder-style .bookmarks-grid {
+    display: none;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 0 0 10px 10px;
+    margin-top: 0;
+}
+
+.category.folder-style.expanded .bookmarks-grid {
+    display: grid;
+}
+
+.category.folder-style .category-header {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 0.8rem;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.category.folder-style.expanded .category-header {
+    border-radius: 10px 10px 0 0;
+}
+
+.category.folder-style .category-header::before {
+    content: "📁";
+    font-size: 1.2rem;
+}
+
+.category.folder-style.expanded .category-header::before {
+    content: "📂";
+}
+
+.category.frequently-used .category-header::before {
+    content: "⭐";
 }
